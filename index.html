@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuis Interaktif — Iman kepada Kitab-kitab Allah</title>
+  <style>
+    :root {
+      --primary: #0d7377;
+      --primary-dark: #095456;
+      --secondary: #14919b;
+      --accent: #212e53;
+      --gold: #c9a227;
+      --cream: #f8f5f0;
+      --soft-green: #e8f5e9;
+      --soft-red: #ffebee;
+      --text: #2c3e50;
+      --muted: #5d6d7e;
+      --white: #ffffff;
+      --shadow: 0 8px 28px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 15% 85%, rgba(13,115,119,0.05) 0%, transparent 45%),
+        radial-gradient(circle at 85% 15%, rgba(201,162,39,0.06) 0%, transparent 45%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(145deg, #0d7377 0%, #095456 60%, #0a3d40 100%);
+      color: white;
+      text-align: center;
+      padding: 2.2rem 1.2rem 2.6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 36px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 40'%3E%3Cpath fill='%23f8f5f0' d='M0,20 C360,40 1080,0 1440,20 L1440,40 L0,40 Z'/%3E%3C/svg%3E") no-repeat bottom;
+      background-size: cover;
+    }
+    .header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      font-size: 0.78rem;
+      letter-spacing: 1.2px;
+      margin-bottom: 0.8rem;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .header h1 {
+      font-size: clamp(1.45rem, 4.5vw, 1.9rem);
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .header p {
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    /* Progress */
+    .progress-wrap {
+      max-width: 640px;
+      margin: 1.4rem auto 0;
+      padding: 0 1.2rem;
+    }
+    .progress-bar-bg {
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 50px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--gold));
+      border-radius: 50px;
+      transition: width 0.4s ease;
+    }
+    .progress-text {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.45rem;
+    }
+
+    /* Main */
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 1.5rem 1.2rem 3rem;
+    }
+
+    /* Question card */
+    .quiz-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.7rem 1.5rem;
+      margin-bottom: 1.4rem;
+      border: 1px solid rgba(0,0,0,0.04);
+      animation: fadeUp 0.4s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .q-number {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      margin-bottom: 0.85rem;
+    }
+    .q-text {
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+
+    /* Options */
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      width: 100%;
+      text-align: left;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 0.65rem;
+      border: 2px solid #e8e8e8;
+      border-radius: 12px;
+      background: var(--white);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.22s;
+      color: var(--text);
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--primary);
+      background: var(--soft-green);
+      transform: translateX(4px);
+    }
+    .option .letter {
+      min-width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .option:hover:not(.disabled) .letter {
+      background: var(--primary);
+      color: white;
+    }
+    .option.correct {
+      border-color: #4caf50;
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-weight: 600;
+    }
+    .option.correct .letter {
+      background: #4caf50;
+      color: white;
+    }
+    .option.wrong {
+      border-color: #ef5350;
+      background: var(--soft-red);
+      color: #c62828;
+    }
+    .option.wrong .letter {
+      background: #ef5350;
+      color: white;
+    }
+    .option.disabled { cursor: default; pointer-events: none; }
+    .option.show-correct {
+      border-color: #4caf50;
+      background: #e8f5e9;
+    }
+    .option.show-correct .letter {
+      background: #4caf50;
+      color: white;
+    }
+
+    /* Feedback */
+    .feedback {
+      margin-top: 1rem;
+      padding: 0.9rem 1.15rem;
+      border-radius: 12px;
+      font-weight: 500;
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+    .feedback.show { display: block; }
+    .feedback.ok {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+    .feedback.bad {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Next button */
+    .next-btn {
+      display: none;
+      width: 100%;
+      margin-top: 1.2rem;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(13,115,119,0.3);
+      transition: all 0.25s;
+    }
+    .next-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(13,115,119,0.4);
+    }
+    .next-btn.show { display: block; }
+
+    /* Result screen */
+    .result-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2.4rem 1.6rem;
+      text-align: center;
+      display: none;
+      animation: fadeUp 0.45s ease;
+    }
+    .result-card.show { display: block; }
+    .result-icon {
+      font-size: 3.2rem;
+      margin-bottom: 0.8rem;
+    }
+    .result-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .result-score {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 0.6rem 0;
+    }
+    .result-msg {
+      color: var(--muted);
+      margin-bottom: 1.6rem;
+      font-size: 1.02rem;
+    }
+    .result-detail {
+      background: var(--soft-green);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .restart-btn {
+      padding: 0.85rem 2rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(13,115,119,0.3);
+      transition: all 0.25s;
+    }
+    .restart-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(13,115,119,0.4);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="badge">KUIS INTERAKTIF</div>
+    <h1>Iman kepada Kitab-kitab Allah</h1>
+    <p>PAI Kelas VIII • Kurikulum Merdeka</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text" id="progressText">Soal 1 dari 5</div>
+  </div>
+
+  <div class="container">
+    <!-- Quiz area -->
+    <div id="quizArea">
+      <div class="quiz-card" id="questionCard">
+        <div class="q-number" id="qNumber">Soal 1</div>
+        <div class="q-text" id="qText"></div>
+        <div id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Soal Berikutnya →</button>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card" id="resultCard">
+      <div class="result-icon" id="resultIcon">🎉</div>
+      <div class="result-title" id="resultTitle">Hasil Kuis</div>
+      <div class="result-score" id="resultScore">0 / 5</div>
+      <div class="result-msg" id="resultMsg"></div>
+      <div class="result-detail" id="resultDetail"></div>
+      <button class="restart-btn" onclick="restartQuiz()">Ulangi Kuis 🔄</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    Sri Umi Lestari • Guru PAI SMPN 9 Lais
+  </div>
+
+  <script>
+    const questions = [
+      {
+        q: "Kitab suci yang diturunkan Allah kepada Nabi Musa a.s. adalah...",
+        options: ["Zabur", "Taurat", "Injil", "Al-Qur’an"],
+        answer: 1 // B
+      },
+      {
+        q: "Kitab suci yang diturunkan kepada Nabi Daud a.s. adalah...",
+        options: ["Taurat", "Injil", "Zabur", "Al-Qur’an"],
+        answer: 2 // C
+      },
+      {
+        q: "Kitab suci yang diturunkan Allah kepada Nabi Isa a.s. adalah...",
+        options: ["Taurat", "Zabur", "Injil", "Al-Qur’an"],
+        answer: 2 // C
+      },
+      {
+        q: "Kitab Allah yang terakhir diturunkan dan menjadi pedoman hidup umat manusia sampai akhir zaman adalah...",
+        options: ["Taurat", "Zabur", "Injil", "Al-Qur’an"],
+        answer: 3 // D
+      },
+      {
+        q: "Sikap yang benar terhadap kitab-kitab Allah adalah...",
+        options: [
+          "Hanya percaya kepada Al-Qur’an dan menolak kitab sebelumnya",
+          "Percaya kepada semua kitab Allah, tetapi hanya mengamalkan Al-Qur’an",
+          "Mengamalkan semua isi kitab-kitab sebelumnya",
+          "Tidak perlu mempercayai kitab selain Al-Qur’an"
+        ],
+        answer: 1 // B
+      }
+    ];
+
+    const letters = ["A", "B", "C", "D"];
+    let current = 0;
+    let score = 0;
+    let answered = false;
+
+    function loadQuestion() {
+      answered = false;
+      const data = questions[current];
+      document.getElementById("qNumber").textContent = `Soal ${current + 1}`;
+      document.getElementById("qText").textContent = data.q;
+
+      const optionsEl = document.getElementById("options");
+      optionsEl.innerHTML = "";
+      data.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+        btn.onclick = () => selectAnswer(i, btn);
+        optionsEl.appendChild(btn);
+      });
+
+      document.getElementById("feedback").className = "feedback";
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("nextBtn").classList.remove("show");
+      document.getElementById("nextBtn").textContent =
+        current === questions.length - 1 ? "Lihat Hasil →" : "Soal Berikutnya →";
+
+      // Progress
+      const pct = (current / questions.length) * 100;
+      document.getElementById("progressFill").style.width = pct + "%";
+      document.getElementById("progressText").textContent = `Soal ${current + 1} dari ${questions.length}`;
+    }
+
+    function selectAnswer(idx, btn) {
+      if (answered) return;
+      answered = true;
+      const data = questions[current];
+      const options = document.querySelectorAll(".option");
+      const feedback = document.getElementById("feedback");
+
+      options.forEach(o => o.classList.add("disabled"));
+
+      if (idx === data.answer) {
+        btn.classList.add("correct");
+        feedback.className = "feedback show ok";
+        feedback.textContent = "✓ Benar! Jawaban tepat.";
+        score++;
+      } else {
+        btn.classList.add("wrong");
+        options[data.answer].classList.add("show-correct");
+        feedback.className = "feedback show bad";
+        feedback.textContent = `✗ Belum tepat. Jawaban yang benar: ${letters[data.answer]}. ${data.options[data.answer]}`;
+      }
+
+      document.getElementById("nextBtn").classList.add("show");
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current < questions.length) {
+        loadQuestion();
+        // Update progress after moving
+        const pct = (current / questions.length) * 100;
+        document.getElementById("progressFill").style.width = pct + "%";
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById("quizArea").style.display = "none";
+      document.getElementById("progressFill").style.width = "100%";
+      document.getElementById("progressText").textContent = "Selesai!";
+
+      const resultCard = document.getElementById("resultCard");
+      resultCard.classList.add("show");
+
+      document.getElementById("resultScore").textContent = `${score} / ${questions.length}`;
+
+      let icon, title, msg;
+      if (score === 5) {
+        icon = "🏆"; title = "Luar Biasa!"; msg = "Sempurna! Kamu menguasai materi dengan sangat baik.";
+      } else if (score >= 4) {
+        icon = "🎉"; title = "Bagus Sekali!"; msg = "Hampir sempurna. Terus pertahankan semangat belajarnya!";
+      } else if (score >= 3) {
+        icon = "👍"; title = "Bagus!"; msg = "Sudah bagus. Coba pelajari lagi bagian yang masih kurang.";
+      } else {
+        icon = "📚"; title = "Semangat Belajar!"; msg = "Jangan menyerah. Baca kembali materi dan coba lagi, ya!";
+      }
+      document.getElementById("resultIcon").textContent = icon;
+      document.getElementById("resultTitle").textContent = title;
+      document.getElementById("resultMsg").textContent = msg;
+      document.getElementById("resultDetail").textContent =
+        `Kamu menjawab benar ${score} dari ${questions.length} soal.`;
+    }
+
+    function restartQuiz() {
+      current = 0;
+      score = 0;
+      document.getElementById("resultCard").classList.remove("show");
+      document.getElementById("quizArea").style.display = "block";
+      loadQuestion();
+    }
+
+    // Start
+    loadQuestion();
+  </script>
+</body>
+</html>
